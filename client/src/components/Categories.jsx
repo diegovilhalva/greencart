@@ -7,7 +7,7 @@ const Categories = () => {
     const { navigate } = useAppContext()
     return (
         <div className="mt-16">
-            <p className="text-2xl md:text-3xl font-bold text-center mb-8">
+            <p className="text-2xl md:text-3xl font-medium  mb-8">
                 Explore by Category
             </p>
 
