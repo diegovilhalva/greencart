@@ -10,5 +10,6 @@
 @theme {
   --color-primary: #4fbf8b;
   --color-primary-dull: #44ae7c;
-
+  --color-logout:#ef4444;
+  --color-logout-hover:#dc2626;
 }
