@@ -1,27 +1,29 @@
 import React from 'react'
 import Navbar from './components/Navbar'
-import { isRouteErrorResponse, Route, Routes, useLocation } from 'react-router'
+import { Route, Routes, useLocation } from 'react-router'
 import Home from './pages/Home'
 import { Toaster } from 'react-hot-toast'
 import Footer from './components/Footer'
 import { useAppContext } from './context/AppContext'
 import Login from './components/Login'
+import AllProducts from './pages/AllProducts'
 
 const App = () => {
   const isSellerPath = useLocation().pathname.includes("seller")
-  const {showUserLogin } = useAppContext()
+  const { showUserLogin } = useAppContext()
   return (
     <div className=''>
       {isSellerPath ? null :
         <Navbar />}
-      { showUserLogin ? <Login /> : null}
+      {showUserLogin ? <Login /> : null}
       <Toaster />
       <div className={`${isSellerPath ? '' : 'px-6 md:px-16 lg:px-24 xl:px-32'}`}>
         <Routes>
           <Route path='/' element={<Home />} />
+          <Route path='/products' element={<AllProducts />} />
         </Routes>
       </div>
-        { !isSellerPath && <Footer />}
+      {!isSellerPath && <Footer />}
     </div>
   )
 }
