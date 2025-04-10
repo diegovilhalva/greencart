@@ -1,6 +1,7 @@
 import logo from "./logo.svg";
 import search_icon from "./search_icon.svg";
 import remove_icon from "./remove_icon.svg";
+import google_logo from "./google_logo.svg"
 import arrow_right_icon_colored from "./arrow_right_icon_colored.svg";
 import star_icon from "./star_icon.svg";
 import star_dull_icon from "./star_dull_icon.svg";
@@ -74,6 +75,7 @@ import barley_image from "./barley_image.png";
 
 export const assets = {
   logo,
+  google_logo,
   search_icon,
   remove_icon,
   arrow_right_icon_colored,

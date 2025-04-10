@@ -148,7 +148,7 @@ const Navbar = () => {
 
             {/* Mobile Menu */}
             {open && (<div className={`sm:hidden absolute top-full left-0 w-full bg-white shadow-lg ${open ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                } transition-all duration-300 overflow-hidden`}>
+                } transition-all duration-300 overflow-hidden z-50`}>
                 <div className="px-4 py-4 space-y-4">
                     <div className="flex items-center gap-2 border border-gray-300 px-3 rounded-full">
                         <input
