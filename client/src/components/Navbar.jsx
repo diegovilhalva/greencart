@@ -15,7 +15,8 @@ const Navbar = () => {
         setShowUserLogin,
         navigate,
         setSearchQuery,
-        searchQuery
+        searchQuery,
+        getCartCount,
     } = useAppContext()
 
     const handleLogout = async () => {
@@ -80,7 +81,7 @@ const Navbar = () => {
 
                     <div className="relative cursor-pointer ml-4" onClick={() => navigate("/cart")}>
                         <img src={assets.cart_icon_2} alt="cart" className='w-6 opacity-80 min-w-[24px]' />
-                        <button className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full">3</button>
+                        <button className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full">{getCartCount()}</button>
                     </div>
 
                     {!user ? (
@@ -121,9 +122,9 @@ const Navbar = () => {
 
                 {/* Mobile Menu Button */}
                 <div className="sm:hidden flex items-center gap-4">
-                    <div className="relative cursor-pointer">
+                    <div className="relative cursor-pointer" onClick={() => navigate("/cart")}>
                         <img src={assets.cart_icon_2} alt="cart" className='w-5 opacity-80 md:w-4' />
-                        <button className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full">3</button>
+                        <button className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full">{getCartCount()}</button>
                     </div>
                     <button
                         onClick={() => setOpen(!open)}

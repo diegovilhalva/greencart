@@ -13,8 +13,14 @@ export const AppContextProvider = ({ children }) => {
     const [isSeller, setIsSeller] = useState(false)
     const [showUserLogin, setShowUserLogin] = useState(false)
     const [products, setProducts] = useState([])
-    const [cartItems, setCartItems] = useState({})
-    const [searchQuery,setSearchQuery] = useState("")
+    const [cartItems, setCartItems] = useState(() => {
+        const savedCart = localStorage.getItem('cart')
+        return savedCart ? JSON.parse(savedCart) : {}
+    });
+    useEffect(() => {
+        localStorage.setItem('cart', JSON.stringify(cartItems));
+    }, [cartItems]);
+    const [searchQuery, setSearchQuery] = useState("")
     const fetchProducts = async () => {
         setProducts(dummyProducts)
     }
@@ -37,7 +43,7 @@ export const AppContextProvider = ({ children }) => {
         toast.success("Cart Updated")
     }
 
-    const removeFromCart  = (itemId) => {
+    const removeFromCart = (itemId) => {
         let cartData = structuredClone(cartItems)
         if (cartData[itemId]) {
             cartData[itemId] -= 1
@@ -49,13 +55,33 @@ export const AppContextProvider = ({ children }) => {
         setCartItems(cartData)
     }
 
+    const getCartCount = () => {
+        let totalCount = 0;
+        for (const item in cartItems) {
+            totalCount += cartItems[item]
+        }
+        return totalCount
+    }
+
+    const getCartAmount = () => {
+        let totalAmount = 0
+
+        for (const items in cartItems) {
+            let itemInfo = products.find((product) => product._id === items)
+            if (itemInfo && cartItems[items] > 0) {
+                totalAmount += itemInfo.offerPrice * cartItems[items]
+            }
+        }
+        return Math.floor(totalAmount * 100) / 100
+    }
     useEffect(() => {
         fetchProducts()
 
 
     }, [])
 
-    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart,updateCartItem,removeFromCart,cartItems,searchQuery,setSearchQuery }
+
+    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount }
     return <AppContext.Provider value={value}>
         {children}
     </AppContext.Provider>
