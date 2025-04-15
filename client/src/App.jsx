@@ -1,6 +1,6 @@
 import React from 'react'
 import Navbar from './components/Navbar'
-import { Route, Routes, useLocation } from 'react-router'
+import { Route, Router, Routes, useLocation } from 'react-router'
 import Home from './pages/Home'
 import { Toaster } from 'react-hot-toast'
 import Footer from './components/Footer'
@@ -14,6 +14,9 @@ import AddAddress from './pages/AddAddress'
 import MyOrders from './pages/MyOrders'
 import SellerLogin from './components/seller/SellerLogin'
 import SellerLayout from './pages/seller/SellerLayout'
+import AddProduct from './pages/seller/AddProduct'
+import ProductList from './pages/seller/ProductList'
+import Orders from './pages/seller/Orders'
 
 const App = () => {
   const isSellerPath = useLocation().pathname.includes("seller")
@@ -34,7 +37,9 @@ const App = () => {
           <Route path='/add-address' element={<AddAddress />} />
           <Route path='/orders' element={<MyOrders />} />
           <Route path='/seller' element={isSeller ? <SellerLayout /> : <SellerLogin />}>
-
+            <Route index element={isSeller ? <AddProduct /> : null} />
+            <Route path='product-list' element={<ProductList />} />
+            <Route path='orders' element={<Orders />} />
           </Route>
         </Routes>
       </div>

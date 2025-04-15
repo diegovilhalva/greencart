@@ -13,3 +13,7 @@
   --color-logout:#ef4444;
   --color-logout-hover:#dc2626;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display:"none";
+}
