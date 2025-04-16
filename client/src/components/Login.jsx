@@ -8,6 +8,7 @@ const Login = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const api = import.meta.env.VITE_URL_ENDPOINT
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === "Escape") {
@@ -24,8 +25,7 @@ const Login = () => {
     }, []);
 
     const handleGoogleLogin = () => {
-        // TODO: Implementar lógica do Google
-        console.log("Google login clicked");
+        window.location.href = `${api}/user/google`
     }
 
     const onSubmitHandler = async (e) => {
