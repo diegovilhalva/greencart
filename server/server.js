@@ -3,7 +3,7 @@ import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import connectDB from "./configs/db.js"
-
+import userRoutes from "./routes/user.route.js"
 
 
 dotenv.config()
@@ -22,6 +22,7 @@ app.get("/", (req, res) => {
     res.send("ok")
 })
 
+app.use("/api/user", userRoutes)
 
 connectDB().then(() => {
     app.listen(PORT, () => {
