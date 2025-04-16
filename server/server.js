@@ -4,11 +4,10 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import session from "express-session";
 import passport from "passport";
-
 import "./configs/passport.js";
 import connectDB from "./configs/db.js"
 import userRoutes from "./routes/user.route.js"
-
+import sellerRoutes from "./routes/seller.route.js"
 
 dotenv.config()
 const app = express()
@@ -38,6 +37,7 @@ app.get("/", (req, res) => {
 })
 
 app.use("/api/user", userRoutes)
+app.use("/api/seller",sellerRoutes)
 
 connectDB().then(() => {
     app.listen(PORT, () => {
