@@ -33,7 +33,7 @@ const Login = () => {
         setUser({
             email:email,
             name:name,
-            
+    
         })
 
         setShowUserLogin(false)

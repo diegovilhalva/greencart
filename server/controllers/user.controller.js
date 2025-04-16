@@ -2,6 +2,7 @@ import User from "../models/user.model.js"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import { validateLoginInput, validateRegisterInput } from "../helpers/validators.js"
+import cloudinary from "../configs/cloudinary.js"
 
 
 export const register = async (req, res) => {
@@ -92,3 +93,76 @@ export const login = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 };
+
+
+export const updateUser = async (req, res) => {
+    try {
+        const userId = req.user._id
+
+
+        const user = await User.findOne({
+            _id: userId,
+            googleId: { $exists: false }
+        })
+
+        if (!user) {
+            return res.status(403).json({
+                success: false, message: "Google users cannot update profile or user not found"
+            })
+        }
+
+
+        const updates = {}
+        if (req.body.name) updates.name = req.body.name
+        if (req.body.email) updates.email = req.body.email
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path)
+            updates.avatar = result.secure_url
+        }
+
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: updates },
+            { new: true, runValidators: true }
+        ).select('-password -googleId -__v')
+
+        res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            user: updatedUser
+        })
+
+    } catch (error) {
+        console.error("Update error:", error)
+        res.status(500).json({
+            success: false,
+            message: "Error updating profile",
+        })
+    }
+}
+
+export const isAuth = async (req, res) => {
+    try {
+        const { userId } = req.body
+        const user = await User.findById(userId).select("-password")
+        return res.status(200).json({ success: true, user })
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({ success: false, message: error.message })
+    }
+}
+
+export const logout = async (req, res) => {
+    try {
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        return res.json({ success: true, message: "Logged Out" })
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({ success: false, message: error.message })
+    }
+}

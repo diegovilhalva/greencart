@@ -110,6 +110,9 @@ const Navbar = () => {
                                         <NavLink to="/orders" className="block px-4 py-2 hover:bg-gray-100 transition-colors" onClick={() => setShowDropdown(false)}>My Orders</NavLink>
                                     </li>
                                     <li>
+                                        <NavLink to="/edit-profile" className="block px-4 py-2 hover:bg-gray-100 transition-colors" onClick={() => setShowDropdown(false)}>Edit Profile</NavLink>
+                                    </li>
+                                    <li>
                                         <button onClick={handleLogout} className="w-full text-left px-4 py-2 hover:bg-red-50 text-logout transition-colors">
                                             Logout
                                         </button>
@@ -160,7 +163,10 @@ const Navbar = () => {
                         <NavLink to="/" onClick={() => setOpen(false)} className="block py-2 px-2 hover:bg-gray-50 rounded-lg transition-colors">Contact</NavLink>
 
                         {user && (
-                            <NavLink to="/orders" onClick={() => setOpen(false)} className="block py-2 px-2 hover:bg-gray-50 rounded-lg transition-colors">My Orders</NavLink>
+                            <>
+                                <NavLink to="/orders" onClick={() => setOpen(false)} className="block py-2 px-2 hover:bg-gray-50 rounded-lg transition-colors">My Orders</NavLink>
+                                <NavLink to="/edit-profile" className="block px-2 py-2 hover:bg-gray-100 transition-colors" onClick={() => setShowDropdown(false)}>Edit Profile</NavLink>
+                            </>
                         )}
 
                         {!user ? (

@@ -1,7 +1,10 @@
 import express from "express"
-import { login, register } from "../controllers/user.controller.js"
+import { isAuth, login, logout, register } from "../controllers/user.controller.js"
 import passport from "passport"
 import jwt from "jsonwebtoken"
+import upload from "../middlewares/upload.js"
+import authUser from "../middlewares/auth-user.js"
+
 const router = express.Router()
 
 
@@ -25,6 +28,13 @@ router.get(
         res.redirect(process.env.CLIENT_URL)
     }
 );
+router.patch(
+    '/update',
+    upload.single('image'),
+    updateUser
+)
 
+router.get("/is-auth", authUser, isAuth)
+router.get("/logout", authUser, logout)
 
 export default router
