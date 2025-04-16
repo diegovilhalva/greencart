@@ -8,7 +8,7 @@ const EditProfile = () => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        profileImage: '',
+        avatar: '',
     })
 
     useEffect(() => {
@@ -21,7 +21,7 @@ const EditProfile = () => {
             setFormData({
                 name: user.name || '',
                 email: user.email || '',
-                profileImage: user.profileImage || '',
+                avatar: user.avatar || '',
             })
         }
     }, [user, navigate])
@@ -106,12 +106,16 @@ const EditProfile = () => {
 
 
 
-                {formData.profileImage && (
+                {formData.avatar ? (
                     <img
-                        src={formData.profileImage}
+                        src={formData.avatar}
                         alt="Preview"
                         className="w-20 h-20 object-cover rounded-full border"
                     />
+                ) : (
+                    <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-sm text-gray-500">
+                        No Image
+                    </div>
                 )}
 
                 <input

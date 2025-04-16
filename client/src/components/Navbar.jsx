@@ -98,7 +98,7 @@ const Navbar = () => {
                         <div className="relative" ref={dropdownRef}>
                             <div className="cursor-pointer" onClick={() => setShowDropdown(!showDropdown)}>
                                 <img
-                                    src={user.profileImage || assets.profile_icon}
+                                    src={user.avatar || assets.profile_icon}
                                     alt="profile_icon"
                                     className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 hover:border-primary transition-colors"
                                 />

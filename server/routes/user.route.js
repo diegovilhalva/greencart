@@ -1,5 +1,5 @@
 import express from "express"
-import { isAuth, login, logout, register } from "../controllers/user.controller.js"
+import { isAuth, login, logout, register, updateUser } from "../controllers/user.controller.js"
 import passport from "passport"
 import jwt from "jsonwebtoken"
 import upload from "../middlewares/upload.js"
@@ -30,6 +30,7 @@ router.get(
 );
 router.patch(
     '/update',
+    authUser,
     upload.single('image'),
     updateUser
 )
