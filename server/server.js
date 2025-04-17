@@ -8,6 +8,7 @@ import "./configs/passport.js";
 import connectDB from "./configs/db.js"
 import userRoutes from "./routes/user.route.js"
 import sellerRoutes from "./routes/seller.route.js"
+import productRoutes from "./routes/product.route.js"
 
 dotenv.config()
 const app = express()
@@ -37,7 +38,9 @@ app.get("/", (req, res) => {
 })
 
 app.use("/api/user", userRoutes)
-app.use("/api/seller",sellerRoutes)
+app.use("/api/seller", sellerRoutes)
+app.use("/api/product", productRoutes)
+
 
 connectDB().then(() => {
     app.listen(PORT, () => {
