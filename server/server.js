@@ -9,6 +9,7 @@ import connectDB from "./configs/db.js"
 import userRoutes from "./routes/user.route.js"
 import sellerRoutes from "./routes/seller.route.js"
 import productRoutes from "./routes/product.route.js"
+import cartRoutes from "./routes/cart.route.js"
 
 dotenv.config()
 const app = express()
@@ -40,7 +41,7 @@ app.get("/", (req, res) => {
 app.use("/api/user", userRoutes)
 app.use("/api/seller", sellerRoutes)
 app.use("/api/product", productRoutes)
-
+app.use("/api/cart", cartRoutes)
 
 connectDB().then(() => {
     app.listen(PORT, () => {
