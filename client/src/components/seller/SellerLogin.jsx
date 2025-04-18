@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 import { useAppContext } from "../../context/AppContext"
+import axiosInstance from "../../api/axios"
+import toast from "react-hot-toast"
 
 
 const SellerLogin = () => {
@@ -14,9 +16,19 @@ const SellerLogin = () => {
         }
     }, [isSeller])
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        setIsSeller(true)
+    const handleSubmit = async (e) => {
+        try {
+            e.preventDefault()
+            const { data } = await axiosInstance.post('/seller/login', { email, password })
+            if (data.success) {
+                setIsSeller(true)
+                navigate("/seller")
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.message || error.message)
+        }
     }
     return !isSeller && (
         <form onSubmit={handleSubmit} className="min-h-screen flex items-center text-sm text-gray-600">
@@ -28,9 +40,9 @@ const SellerLogin = () => {
                 </div>
                 <div className="w-full">
                     <p>Password</p>
-                    <input type="password" placeholder="Enter your password" 
-                    onChange={(e) => setPassword(e.target.value)} value={password} 
-                    className="border border-gray-200 rounded w-full p-2 mt-1 outline-primary" />
+                    <input type="password" placeholder="Enter your password"
+                        onChange={(e) => setPassword(e.target.value)} value={password}
+                        className="border border-gray-200 rounded w-full p-2 mt-1 outline-primary" />
                 </div>
                 <button className="bg-primary text-white w-full py-2 rounded-md cursor-pointer">Login</button>
             </div>

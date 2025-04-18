@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { dummyProducts } from "../assets/assets";
 import toast from "react-hot-toast"
+import axiosInstance from "../api/axios";
 
 export const AppContext = createContext()
 
@@ -13,13 +14,26 @@ export const AppContextProvider = ({ children }) => {
     const [isSeller, setIsSeller] = useState(false)
     const [showUserLogin, setShowUserLogin] = useState(false)
     const [products, setProducts] = useState([])
+
+    const fetchSeller = async () => {
+        try {
+            const { data } = await axiosInstance.get("/seller/is-auth")
+            if (data.success) {
+                setIsSeller(true)
+            } else {
+                setIsSeller(false)
+            }
+        } catch (error) {
+            setIsSeller(false)
+        }
+    }
     const [cartItems, setCartItems] = useState(() => {
         const savedCart = localStorage.getItem('cart')
         return savedCart ? JSON.parse(savedCart) : {}
     });
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cartItems));
-    }, [cartItems]);
+    }, [cartItems])
     const [searchQuery, setSearchQuery] = useState("")
     const fetchProducts = async () => {
         setProducts(dummyProducts)
@@ -76,7 +90,7 @@ export const AppContextProvider = ({ children }) => {
     }
     useEffect(() => {
         fetchProducts()
-
+        fetchSeller()
 
     }, [])
 
