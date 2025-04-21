@@ -15,7 +15,7 @@ export const addProduct = async (req, res) => {
         if (!images || images.length === 0) {
             return res.status(400).json({ success: false, message: "At least one image is required" });
         }
-
+      
         
         const uploadImage = (fileBuffer) => {
             return new Promise((resolve, reject) => {
@@ -30,6 +30,7 @@ export const addProduct = async (req, res) => {
             })
         }
 
+
         const imagesUrl = await Promise.all(images.map(file => uploadImage(file.buffer)))
 
         await Product.create({ ...productData, image: imagesUrl })
@@ -38,6 +39,7 @@ export const addProduct = async (req, res) => {
 
     } catch (error) {
         console.error("Add product error:", error.message)
+        console.log(error)
         res.status(500).json({ success: false, message: "An error has occurred, try again later" })
     }
 }

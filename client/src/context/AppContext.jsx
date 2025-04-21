@@ -14,6 +14,12 @@ export const AppContextProvider = ({ children }) => {
     const [isSeller, setIsSeller] = useState(false)
     const [showUserLogin, setShowUserLogin] = useState(false)
     const [products, setProducts] = useState([])
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 10,
+        total: 0
+    })
+
 
     const fetchSeller = async () => {
         try {
@@ -27,6 +33,8 @@ export const AppContextProvider = ({ children }) => {
             setIsSeller(false)
         }
     }
+
+
     const [cartItems, setCartItems] = useState(() => {
         const savedCart = localStorage.getItem('cart')
         return savedCart ? JSON.parse(savedCart) : {}
@@ -35,10 +43,31 @@ export const AppContextProvider = ({ children }) => {
         localStorage.setItem('cart', JSON.stringify(cartItems));
     }, [cartItems])
     const [searchQuery, setSearchQuery] = useState("")
-    const fetchProducts = async () => {
-        setProducts(dummyProducts)
-    }
 
+
+    const fetchProducts = async () => {
+        try {
+          const { data } = await axiosInstance.get(`/product/list?page=${pagination.page}&limit=${pagination.limit}`)
+          if (data.success) {
+            setProducts(data.data)
+            setPagination(prev => ({
+              ...prev,
+              total: data.pagination.total,
+              pages: data.pagination.pages
+            }))
+          }
+        } catch (error) {
+          toast.error(error.response.data.message)
+        }
+      }
+
+      const changePage = (newPage) => {
+        setPagination((prev) => ({
+          ...prev,
+          page: newPage
+        }));
+      };
+      
     const addToCart = async (itemId) => {
         let cartData = structuredClone(cartItems)
         if (cartData[itemId]) {
@@ -92,10 +121,10 @@ export const AppContextProvider = ({ children }) => {
         fetchProducts()
         fetchSeller()
 
-    }, [])
+    }, [pagination.page])
 
 
-    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount }
+    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount,changePage,pagination }
     return <AppContext.Provider value={value}>
         {children}
     </AppContext.Provider>
