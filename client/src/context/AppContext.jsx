@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { dummyProducts } from "../assets/assets";
 import toast from "react-hot-toast"
 import axiosInstance from "../api/axios";
 
@@ -33,6 +32,22 @@ export const AppContextProvider = ({ children }) => {
             setIsSeller(false)
         }
     }
+    const logoutSeller = async () => {
+        try {
+            const { data } = await axiosInstance.get("/seller/logout")
+            if (data.success) {
+                setIsSeller(false)
+                setProducts([]) // opcional: limpa os produtos
+                setPagination({ page: 1, limit: 10, total: 0 }) // reseta paginação
+                toast.success("Seller logged out")
+
+            }
+        } catch (error) {
+            toast.error("Failed to logout")
+        }
+    }
+
+
 
 
     const [cartItems, setCartItems] = useState(() => {
@@ -47,27 +62,38 @@ export const AppContextProvider = ({ children }) => {
 
     const fetchProducts = async () => {
         try {
-          const { data } = await axiosInstance.get(`/product/list?page=${pagination.page}&limit=${pagination.limit}`)
-          if (data.success) {
-            setProducts(data.data)
-            setPagination(prev => ({
-              ...prev,
-              total: data.pagination.total,
-              pages: data.pagination.pages
-            }))
-          }
-        } catch (error) {
-          toast.error(error.response.data.message)
-        }
-      }
+            const { data } = await axiosInstance.get(`/product/list?page=${pagination.page}&limit=${pagination.limit}`);
 
-      const changePage = (newPage) => {
+            if (data.success) {
+                if (isSeller || pagination.page === 1) {
+                    // Substitui os produtos na primeira página ou se for seller
+                    setProducts(data.data);
+                } else {
+                    // Append para usuários normais em páginas > 1
+                    setProducts(prev => [...prev, ...data.data]);
+                }
+
+                setPagination(prev => ({
+                    ...prev,
+                    total: data.pagination.total,
+                    pages: data.pagination.pages
+                }));
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to fetch products");
+        }
+    };
+
+
+
+
+    const changePage = (newPage) => {
         setPagination((prev) => ({
-          ...prev,
-          page: newPage
+            ...prev,
+            page: newPage
         }));
-      };
-      
+    };
+
     const addToCart = async (itemId) => {
         let cartData = structuredClone(cartItems)
         if (cartData[itemId]) {
@@ -118,13 +144,45 @@ export const AppContextProvider = ({ children }) => {
         return Math.floor(totalAmount * 100) / 100
     }
     useEffect(() => {
-        fetchProducts()
         fetchSeller()
+    }, [])
 
-    }, [pagination.page])
+    // Atualiza os produtos quando seller muda
+    useEffect(() => {
+        if (isSeller) {
+            setProducts([]);
+            setPagination(prev => ({ ...prev, page: 1 }));
+        }
+    }, [isSeller]);
 
 
-    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount,changePage,pagination }
+    // Busca produtos sempre que página ou seller mudar
+    useEffect(() => {
+        fetchProducts();
+    }, [pagination.page, isSeller]);
+
+    // Infinite scroll só para usuários comuns
+    useEffect(() => {
+        if (!isSeller) {
+            const handleScroll = () => {
+                if (
+                    window.innerHeight + document.documentElement.scrollTop + 1 >=
+                    document.documentElement.offsetHeight
+                ) {
+                    if (pagination.page < pagination.pages) {
+                        changePage(pagination.page + 1);
+                    }
+                }
+            };
+
+            window.addEventListener("scroll", handleScroll);
+            return () => window.removeEventListener("scroll", handleScroll);
+        }
+    }, [pagination.page, isSeller, pagination.pages]);
+
+
+
+    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount, changePage, pagination, fetchProducts, logoutSeller }
     return <AppContext.Provider value={value}>
         {children}
     </AppContext.Provider>

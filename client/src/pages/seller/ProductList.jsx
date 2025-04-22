@@ -1,8 +1,23 @@
 import React from 'react'
 import { useAppContext } from "../../context/AppContext"
+import axiosInstance from '../../api/axios'
+import toast from 'react-hot-toast'
 
 const ProductList = () => {
-    const { products, currency, pagination, changePage } = useAppContext()
+    const { products, currency, pagination, changePage, fetchProducts,isSeller } = useAppContext()
+    const toogleStock = async (id, inStock) => {
+        try {
+            const { data } = await axiosInstance.post('/product/stock', { id, inStock })
+            if (data.success) {
+                fetchProducts()
+                toast.success(data.message)
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.response.data.message)
+        }
+    }
     return (
         <div className="flex-1 py-10 flex flex-col justify-between">
             <div className="w-full md:p-10 p-4">
@@ -30,7 +45,12 @@ const ProductList = () => {
                                     <td className="px-4 py-3 max-sm:hidden">{currency}{product.offerPrice}</td>
                                     <td className="px-4 py-3">
                                         <   label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
-                                            <input type="checkbox" className="sr-only peer" defaultChecked={product.inStock} />
+                                            <input
+                                                onChange={(e) => toogleStock(product._id, e.target.checked)}
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={product.inStock}
+                                            />
                                             <div className="w-12 h-7 bg-slate-300 rounded-full peer peer-checked:bg-primary transition-colors duration-200"></div>
                                             <span className="dot absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
                                         </label>
@@ -44,7 +64,7 @@ const ProductList = () => {
             </div>
             {pagination.pages > 1 && (
                 <div className="flex flex-wrap justify-center items-center mt-6 gap-2 sm:gap-3">
-                
+
                     <button
                         disabled={pagination.page === 1}
                         onClick={() => changePage(pagination.page - 1)}
@@ -54,7 +74,7 @@ const ProductList = () => {
                         Prev
                     </button>
 
-                
+
                     {Array.from({ length: pagination.pages }, (_, i) => (
                         <button
                             key={i}
@@ -64,13 +84,13 @@ const ProductList = () => {
                                     ? "bg-primary text-white"
                                     : "bg-gray-100 hover:bg-gray-200"
                                 }`}
-                            style={{ minWidth: "2.5rem" }} 
+                            style={{ minWidth: "2.5rem" }}
                         >
                             {i + 1}
                         </button>
                     ))}
 
-                
+
                     <button
                         disabled={pagination.page === pagination.pages}
                         onClick={() => changePage(pagination.page + 1)}

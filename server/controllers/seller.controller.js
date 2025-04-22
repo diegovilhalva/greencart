@@ -35,7 +35,7 @@ export const sellerLogin = async (req, res) => {
 export const isASellerAuth = async (req, res) => {
     try {
         
-        return res.status(200).json({ success: true })
+     return res.status(200).json({ success: true })
     } catch (error) {
         console.error("Seller auth check error:", error)
         res.status(500).json({ success: false, message: "Internal server error" })

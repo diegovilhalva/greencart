@@ -20,7 +20,7 @@ const allowedOrigins = ['http://localhost:5173']
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({ origin: allowedOrigins, credentials: true }))
+app.use(cors({ origin: allowedOrigins, credentials: true, allowedHeaders: ['Content-Type', 'Authorization'] }))
 
 app.use(session({
     secret: process.env.JWT_SECRET,

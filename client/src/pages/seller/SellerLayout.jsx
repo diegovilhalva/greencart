@@ -4,7 +4,7 @@ import { Link, NavLink, Outlet } from "react-router";
  
  
  const SellerLayout = () => {
-     const { setIsSeller } = useAppContext()
+     const { setIsSeller,logoutSeller } = useAppContext()
  
  
      const sidebarLinks = [
@@ -14,7 +14,8 @@ import { Link, NavLink, Outlet } from "react-router";
      ];
  
      const logout = async () => {
-         setIsSeller(false)
+         
+         logoutSeller()
      }
      return (
          <>
