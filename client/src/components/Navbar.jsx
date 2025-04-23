@@ -19,13 +19,16 @@ const Navbar = () => {
         setSearchQuery,
         searchQuery,
         getCartCount,
+        setCartItems
     } = useAppContext()
-
+   
     const handleLogout = async () => {
         try {
             const { data } = await axiosInstance.get("/user/logout")
             if (data.success) {
                 toast.success(data.message)
+                const localCart = JSON.parse(localStorage.getItem('cart')) || {}
+                setCartItems(localCart)
                 setUser(null)
                 navigate("/")
             } else {

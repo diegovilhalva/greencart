@@ -24,15 +24,32 @@ export const AppContextProvider = ({ children }) => {
         try {
             const { data } = await axiosInstance.get("/user/is-auth")
             if (data.success) {
-                setUser(data.user)
-                setCartItems(data.user.cartItems)
+                const localCart = JSON.parse(localStorage.getItem('cart')) || {}
+                const mergedCart = { ...data.user.cartItems, ...localCart }
+                
+                
+                try {
+                    const { data: cartData } = await axiosInstance.post('/cart/update', { 
+                        cartItems: mergedCart 
+                    })
+                    setUser(cartData.user) 
+                } catch (error) {
+                    
+                    setUser(data.user) 
+                }
+                
+                localStorage.removeItem('cart')
+                setCartItems(mergedCart)
             } else {
-                toast.error(data.message)
+                const localCart = JSON.parse(localStorage.getItem('cart')) || {}
+                setCartItems(localCart)
+                setUser(null)
             }
         } catch (error) {
+            
             setUser(null)
         } finally {
-            setIsLoadingUser(false) 
+            setIsLoadingUser(false)
         }
     }
     const fetchSeller = async () => {
@@ -52,8 +69,7 @@ export const AppContextProvider = ({ children }) => {
             const { data } = await axiosInstance.get("/seller/logout")
             if (data.success) {
                 setIsSeller(false)
-                setProducts([]) // opcional: limpa os produtos
-                setPagination({ page: 1, limit: 10, total: 0 }) // reseta paginação
+                setProducts([])
                 toast.success("Seller logged out")
 
             }
@@ -81,10 +97,10 @@ export const AppContextProvider = ({ children }) => {
 
             if (data.success) {
                 if (isSeller || pagination.page === 1) {
-                    // Substitui os produtos na primeira página ou se for seller
+
                     setProducts(data.data);
                 } else {
-                    // Append para usuários normais em páginas > 1
+
                     setProducts(prev => [...prev, ...data.data]);
                 }
 
@@ -164,7 +180,7 @@ export const AppContextProvider = ({ children }) => {
     useEffect(() => {
         fetchUser()
     }, [])
-    // Atualiza os produtos quando seller muda
+
     useEffect(() => {
         if (isSeller) {
             setProducts([]);
@@ -173,12 +189,27 @@ export const AppContextProvider = ({ children }) => {
     }, [isSeller]);
 
 
-    // Busca produtos sempre que página ou seller mudar
+
     useEffect(() => {
         fetchProducts();
     }, [pagination.page, isSeller]);
 
-    // Infinite scroll só para usuários comuns
+    useEffect(() => {
+        const updateCart = async () => {
+            if (!user) return; // Garante que o usuário está definido
+            try {
+                const { data } = await axiosInstance.post('/cart/update', { cartItems });
+                if (!data.success) {
+                    toast.error(data.message);
+                }
+            } catch (error) {
+                toast.error(error.response?.data?.message || "Erro ao atualizar carrinho");
+            }
+        };
+    
+        updateCart();
+    }, [cartItems, user]);
+    
     useEffect(() => {
         if (!isSeller) {
             const handleScroll = () => {
@@ -199,7 +230,7 @@ export const AppContextProvider = ({ children }) => {
 
 
 
-    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount, changePage, pagination, fetchProducts, logoutSeller,isLoadingUser }
+    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount, changePage, pagination, fetchProducts, logoutSeller, isLoadingUser }
     return <AppContext.Provider value={value}>
         {children}
     </AppContext.Provider>
