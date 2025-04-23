@@ -18,8 +18,23 @@ export const AppContextProvider = ({ children }) => {
         limit: 10,
         total: 0
     })
+    const [isLoadingUser, setIsLoadingUser] = useState(true)
 
-
+    const fetchUser = async () => {
+        try {
+            const { data } = await axiosInstance.get("/user/is-auth")
+            if (data.success) {
+                setUser(data.user)
+                setCartItems(data.user.cartItems)
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            setUser(null)
+        } finally {
+            setIsLoadingUser(false) 
+        }
+    }
     const fetchSeller = async () => {
         try {
             const { data } = await axiosInstance.get("/seller/is-auth")
@@ -146,7 +161,9 @@ export const AppContextProvider = ({ children }) => {
     useEffect(() => {
         fetchSeller()
     }, [])
-
+    useEffect(() => {
+        fetchUser()
+    }, [])
     // Atualiza os produtos quando seller muda
     useEffect(() => {
         if (isSeller) {
@@ -182,7 +199,7 @@ export const AppContextProvider = ({ children }) => {
 
 
 
-    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount, changePage, pagination, fetchProducts, logoutSeller }
+    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount, changePage, pagination, fetchProducts, logoutSeller,isLoadingUser }
     return <AppContext.Provider value={value}>
         {children}
     </AppContext.Provider>

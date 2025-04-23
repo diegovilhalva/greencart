@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import { validateLoginInput, validateRegisterInput } from "../helpers/validators.js"
 import cloudinary from "../configs/cloudinary.js"
+import streamifier from "streamifier";
 
 export const register = async (req, res) => {
     try {
@@ -86,15 +87,29 @@ export const login = async (req, res) => {
 }
 
 
+const uploadFromBuffer = (buffer) =>
+    new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { resource_type: "image" },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      streamifier.createReadStream(buffer).pipe(stream);
+    });
+  
 
 export const updateUser = async (req, res) => {
     try {
         const userId = req.user.id
-
+        console.log(userId)        
         const user = await User.findOne({
             _id: userId,
-            googleId: { $exists: false }
+            googleId: null
         })
+        
+       
 
         if (!user) {
             return res.status(403).json({
@@ -106,8 +121,8 @@ export const updateUser = async (req, res) => {
         if (req.body.name) updates.name = req.body.name
         if (req.body.email) updates.email = req.body.email
         if (req.file) {
-            const result = await cloudinary.uploader.upload(req.file.path)
-            updates.avatar = result.secure_url
+            const result = await uploadFromBuffer(req.file.buffer);
+            updates.avatar = result.secure_url;
         }
 
         const updatedUser = await User.findByIdAndUpdate(

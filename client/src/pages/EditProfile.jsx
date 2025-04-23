@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
-import axios from 'axios'
 import toast from 'react-hot-toast'
+import axiosInstance from '../api/axios'
 
 const EditProfile = () => {
-    const { user, setUser, navigate } = useAppContext()
+    const { user, setUser, navigate,isLoadingUser } = useAppContext()
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         avatar: '',
+        imageFile: null,
     })
 
     useEffect(() => {
+        if (isLoadingUser) return
         if (!user) {
-            navigate('/login')
+            navigate('/')
         } else if (user.googleId) {
             toast.error('Google users cannot edit their profile.')
-            navigate('/profile')
+            navigate('/')
         } else {
             setFormData({
                 name: user.name || '',
@@ -33,47 +35,46 @@ const EditProfile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-
+    
         try {
-            const response = await axios.patch(
-                `${import.meta.env.VITE_URL_ENDPOINT}/user/update`,
-                formData,
-                { withCredentials: true }
+            const data = new FormData()
+            data.append('name', formData.name)
+            data.append('email', formData.email)
+            if (formData.imageFile) {
+                data.append('image', formData.imageFile)
+            }
+            console.log(formData.imageFile)
+            const response = await axiosInstance.patch(
+                `/user/update`,
+                data,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                }
             )
-
+    
             setUser(response.data.user)
             toast.success('Profile updated successfully!')
-            navigate('/profile')
+            navigate('/edit-profile')
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to update profile.')
         }
     }
+    
 
-    const handleImageUpload = async (e) => {
+    const handleImageUpload = (e) => {
         const file = e.target.files[0]
         if (!file) return
-
-        try {
-            const formData = new FormData()
-            formData.append('image', file)
-
-            const response = await axios.post(
-                `${import.meta.env.VITE_URL_ENDPOINT}/upload`,
-                formData,
-                {
-                    withCredentials: true,
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            )
-
-            setFormData(prev => ({ ...prev, profileImage: response.data.url }))
-            toast.success('Image uploaded successfully!')
-        } catch (error) {
-            toast.error('Failed to upload image')
-        }
+    
+        const previewURL = URL.createObjectURL(file)
+        setFormData(prev => ({
+            ...prev,
+            avatar: previewURL,
+            imageFile: file
+        }))
     }
+    
 
     return (
         <div className="max-w-xl mx-auto py-8 px-4">

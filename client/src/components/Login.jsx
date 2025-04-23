@@ -1,9 +1,11 @@
-import { useState,useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppContext } from '../context/AppContext';
 import { assets } from '../assets/assets';
+import axiosInstance from '../api/axios';
+import toast from 'react-hot-toast';
 
 const Login = () => {
-    const { setShowUserLogin,setUser } = useAppContext()
+    const { setShowUserLogin, setUser,navigate } = useAppContext()
     const [state, setState] = useState("login");
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -14,11 +16,11 @@ const Login = () => {
             if (e.key === "Escape") {
                 setShowUserLogin(false);
             }
-            
+
         };
-    
+
         window.addEventListener("keydown", handleKeyDown);
-    
+
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
@@ -29,15 +31,23 @@ const Login = () => {
     }
 
     const onSubmitHandler = async (e) => {
-        e.preventDefault()
-        setUser({
-            email:email,
-            name:name,
-    
-        })
+        try {
+            e.preventDefault()
 
-        setShowUserLogin(false)
-        console.log("Submit")
+            const { data } = await axiosInstance.post(`/user/${state}`, { name, email, password })
+            if (data.success) {
+                navigate("/")
+                setUser(data.user)
+                setShowUserLogin(false)
+            }else{
+                toast.error(data.message)
+            }
+
+        } catch (error) {
+            toast.error(error.response.data.message)
+        }
+
+
     }
 
     return (
@@ -55,7 +65,7 @@ const Login = () => {
                     onClick={handleGoogleLogin}
                     className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                   <img src={assets.google_logo} alt="Google logo" className='w-5' />
+                    <img src={assets.google_logo} alt="Google logo" className='w-5' />
                     <span className="text-gray-700 font-medium">Continue with Google</span>
                 </button>
 
@@ -68,38 +78,38 @@ const Login = () => {
                 {state === "register" && (
                     <div className="w-full">
                         <label className="block text-gray-700 mb-1">Name</label>
-                        <input 
-                            onChange={(e) => setName(e.target.value)} 
-                            value={name} 
-                            placeholder="Enter your name" 
-                            className="border border-gray-300 rounded-lg w-full px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
-                            type="text" 
-                            required 
+                        <input
+                            onChange={(e) => setName(e.target.value)}
+                            value={name}
+                            placeholder="Enter your name"
+                            className="border border-gray-300 rounded-lg w-full px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                            type="text"
+                            required
                         />
                     </div>
                 )}
 
                 <div className="w-full">
                     <label className="block text-gray-700 mb-1">Email</label>
-                    <input 
-                        onChange={(e) => setEmail(e.target.value)} 
-                        value={email} 
-                        placeholder="Enter your email" 
-                        className="border border-gray-300 rounded-lg w-full px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
-                        type="email" 
-                        required 
+                    <input
+                        onChange={(e) => setEmail(e.target.value)}
+                        value={email}
+                        placeholder="Enter your email"
+                        className="border border-gray-300 rounded-lg w-full px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                        type="email"
+                        required
                     />
                 </div>
 
                 <div className="w-full">
                     <label className="block text-gray-700 mb-1">Password</label>
-                    <input 
-                        onChange={(e) => setPassword(e.target.value)} 
-                        value={password} 
-                        placeholder="Enter your password" 
-                        className="border border-gray-300 rounded-lg w-full px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
-                        type="password" 
-                        required 
+                    <input
+                        onChange={(e) => setPassword(e.target.value)}
+                        value={password}
+                        placeholder="Enter your password"
+                        className="border border-gray-300 rounded-lg w-full px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                        type="password"
+                        required
                     />
                 </div>
 
@@ -107,9 +117,9 @@ const Login = () => {
                     {state === "register" ? (
                         <p>
                             Already have an account? {' '}
-                            <button 
-                                type="button" 
-                                onClick={() => setState("login")} 
+                            <button
+                                type="button"
+                                onClick={() => setState("login")}
                                 className="text-primary hover:text-primary-dull font-medium cursor-pointer"
                             >
                                 Login here
@@ -118,9 +128,9 @@ const Login = () => {
                     ) : (
                         <p>
                             Don't have an account? {' '}
-                            <button 
-                                type="button" 
-                                onClick={() => setState("register")} 
+                            <button
+                                type="button"
+                                onClick={() => setState("register")}
                                 className="text-primary hover:text-primary-dull font-medium cursor-pointer"
                             >
                                 Create account
@@ -129,8 +139,8 @@ const Login = () => {
                     )}
                 </div>
 
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     className="bg-primary hover:bg-primary-dull transition-colors text-white font-medium w-full py-2.5 rounded-lg cursor-pointer mt-4"
                 >
                     {state === "register" ? "Create Account" : "Sign In"}

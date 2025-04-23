@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router'
 import { assets } from "../assets/assets"
 import { useAppContext } from "../context/AppContext"
+import axiosInstance from '../api/axios'
+import toast from 'react-hot-toast'
 
 const Navbar = () => {
     const [open, setOpen] = useState(false)
@@ -20,8 +22,19 @@ const Navbar = () => {
     } = useAppContext()
 
     const handleLogout = async () => {
-        setUser(null)
-        navigate("/")
+        try {
+            const { data } = await axiosInstance.get("/user/logout")
+            if (data.success) {
+                toast.success(data.message)
+                setUser(null)
+                navigate("/")
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.response.data.message)
+        }
+
     }
 
     const handleClickOutside = (event) => {
