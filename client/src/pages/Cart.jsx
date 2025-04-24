@@ -2,14 +2,16 @@ import { useState } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { assets, dummyAddress } from '../assets/assets'
 import { useEffect } from 'react'
+import axiosInstance from '../api/axios'
+import toast from 'react-hot-toast'
 
 const Cart = () => {
-    const { products, currency, cartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount } = useAppContext()
+    const { products, currency, cartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount, user,setCartItems } = useAppContext()
     const [cartArray, setCartArray] = useState([])
-    const [addresses, setAddresses] = useState(dummyAddress)
+    const [addresses, setAddresses] = useState([])
 
     const [showAddress, setShowAddress] = useState(false)
-    const [selectedAddress, setSelectedAdress] = useState(dummyAddress[0])
+    const [selectedAddress, setSelectedAdress] = useState(null)
     const [paymentOption, setPaymentOption] = useState("COD")
 
     const getCart = () => {
@@ -23,20 +25,62 @@ const Cart = () => {
         setCartArray(tempArray)
     }
 
+    const getUserAddress = async () => {
+        try {
+            const { data } = await axiosInstance.get("/address/get")
+            if (data.success) {
+                setAddresses(data.addresses)
+                if (data.addresses.length > 0) {
+                    setSelectedAdress(data.addresses[0])
+                }
+            } else {
+                toast.error(data.message)
+            }
+            
+        } catch (error) {
+            console.log(error)
+            toast.error(error.response.data.message)
+        }
+    }
+
     useEffect(() => {
         if (products.length > 0 && cartItems) {
             getCart()
         }
     }, [products, cartItems])
 
+    useEffect(() => {
+        if (user) {
+            getUserAddress()
+        }
+    }, [user])
+
     const placeOrder = async () => {
-        // Todo create spripe checkout 
+        try {
+            if (!selectedAddress) {
+                return toast.error("Please select an address")
+            }
+            if (paymentOption === "COD") {
+                const { data } = await axiosInstance.post("/order/cod", { items: cartArray.map(item => ({ product: item._id, quantity: item.quantity })), address: selectedAddress._id })
+
+                if (data.success) {
+                    toast.success(data.message)
+                    setCartItems({})
+                    navigate('/orders')
+                }else{
+                    toast.error(data.message)
+                }
+            }
+        } catch (error) {
+            toast.error(error.response.data.message)
+        }
     }
     return products.length > 0 && getCartCount() > 0 ? (
         <div className="flex flex-col md:flex-row mt-16">
             <div className='flex-1 max-w-4xl'>
                 <h1 className="text-3xl font-medium mb-6">
-                    Shopping Cart <span className="text-sm text-primary">{getCartCount()} Items</span>
+                    Shopping Cart <span className="text-sm text-primary">
+                        {getCartCount() === 1 ? `${getCartCount()} Item` : `${getCartCount()} Items`}</span>
                 </h1>
 
                 <div className="grid grid-cols-[2fr_1fr_1fr] text-gray-500 text-base font-medium pb-3">

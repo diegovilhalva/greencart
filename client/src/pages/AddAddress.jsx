@@ -1,6 +1,9 @@
 import { useState } from "react"
 import { assets } from "../assets/assets"
 import { IMaskMixin } from 'react-imask';
+import { useAppContext } from "../context/AppContext";
+import axiosInstance from "../api/axios";
+import toast from "react-hot-toast";
 
 
 const InputField = ({ type, placeholder, name, handleChange, address }) => (
@@ -29,16 +32,16 @@ const MaskedInputField = ({ mask, placeholder, name, handleChange, address }) =>
     <MaskedInput
         mask={mask}
         value={address[name]}
-        unmask={true} // Altere para boolean
+        unmask={true} 
         onAccept={(value) => {
             handleChange({
                 target: {
                     name,
-                    value // Já vem limpo por causa do unmask
+                    value 
                 }
             })
         }}
-        // Remova a prop commit e use onBlur
+       
         onBlur={(e) => {
             e.target.value = address[name];
             handleChange(e);
@@ -47,7 +50,7 @@ const MaskedInputField = ({ mask, placeholder, name, handleChange, address }) =>
         name={name}
         required
         overwrite
-        // Adicione definições numéricas
+        
         blocks={{
             [name]: {
                 mask: Number,
@@ -60,6 +63,7 @@ const MaskedInputField = ({ mask, placeholder, name, handleChange, address }) =>
 
 
 const AddAddress = () => {
+    const {user,navigate} = useAppContext()
     const [address, setAddress] = useState({
         firstName: '',
         lastName: '',
@@ -73,7 +77,17 @@ const AddAddress = () => {
     })
     const handleSubmit = async (e) => {
         e.preventDefault()
-        
+        try {
+            const {data} =  await axiosInstance.post("/address/add",{address})
+            if (data.success) {
+                toast.success(data.message)
+                navigate("/cart")
+            }else{
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.response.data.message)
+        }
     }
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -82,6 +96,7 @@ const AddAddress = () => {
             [name]: value
         }))
     }
+    
     return (
         <div className="mt-16 pb-16">
             <p className="text-2xl md:text-3xl text-gray-500">Add Shipping <span className="font-semibold text-primary">Address</span></p>

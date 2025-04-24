@@ -22,6 +22,7 @@ const Navbar = () => {
         setCartItems
     } = useAppContext()
    
+    console.log(user)
     const handleLogout = async () => {
         try {
             const { data } = await axiosInstance.get("/user/logout")

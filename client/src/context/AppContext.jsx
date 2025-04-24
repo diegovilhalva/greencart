@@ -22,36 +22,39 @@ export const AppContextProvider = ({ children }) => {
 
     const fetchUser = async () => {
         try {
-            const { data } = await axiosInstance.get("/user/is-auth")
-            if (data.success) {
-                const localCart = JSON.parse(localStorage.getItem('cart')) || {}
-                const mergedCart = { ...data.user.cartItems, ...localCart }
-                
-                
-                try {
-                    const { data: cartData } = await axiosInstance.post('/cart/update', { 
-                        cartItems: mergedCart 
-                    })
-                    setUser(cartData.user) 
-                } catch (error) {
-                    
-                    setUser(data.user) 
-                }
-                
-                localStorage.removeItem('cart')
-                setCartItems(mergedCart)
-            } else {
-                const localCart = JSON.parse(localStorage.getItem('cart')) || {}
-                setCartItems(localCart)
-                setUser(null)
-            }
-        } catch (error) {
-            
-            setUser(null)
+          const { data } = await axiosInstance.get("/user/is-auth");
+          if (!data.success) {
+            setUser(null);
+            setCartItems(JSON.parse(localStorage.getItem('cart')) || {});
+            return;
+          }
+      
+          
+          setUser(data.user);
+      
+        
+          const localCart = JSON.parse(localStorage.getItem('cart')) || {};
+          const mergedCart = { ...data.user.cartItems, ...localCart };
+      
+          
+          try {
+            await axiosInstance.post("/cart/update", { cartItems: mergedCart });
+          } catch (err) {
+            console.warn("Failed to update cart", err);
+          }
+      
+          
+          setCartItems(mergedCart);
+          localStorage.removeItem("cart");
+      
+        } catch (err) {
+          console.error("Failed to fetch user:", err);
+          setUser(null);
         } finally {
-            setIsLoadingUser(false)
+          setIsLoadingUser(false);
         }
-    }
+      };
+      
     const fetchSeller = async () => {
         try {
             const { data } = await axiosInstance.get("/seller/is-auth")
@@ -196,13 +199,14 @@ export const AppContextProvider = ({ children }) => {
 
     useEffect(() => {
         const updateCart = async () => {
-            if (!user) return; // Garante que o usuário está definido
+            if (!user) return; 
             try {
                 const { data } = await axiosInstance.post('/cart/update', { cartItems });
                 if (!data.success) {
                     toast.error(data.message);
                 }
             } catch (error) {
+                console.log(error)
                 toast.error(error.response?.data?.message || "Erro ao atualizar carrinho");
             }
         };
@@ -230,7 +234,7 @@ export const AppContextProvider = ({ children }) => {
 
 
 
-    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount, changePage, pagination, fetchProducts, logoutSeller, isLoadingUser }
+    const value = { navigate, user, setIsSeller, setUser, isSeller, showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartCount, getCartAmount, changePage, pagination, fetchProducts, logoutSeller, isLoadingUser,setCartItems }
     return <AppContext.Provider value={value}>
         {children}
     </AppContext.Provider>
