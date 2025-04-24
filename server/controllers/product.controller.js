@@ -80,6 +80,26 @@ export const productList = async (req, res) => {
     }
 }
 
+export const productsByCategory = async (req, res) => {
+    try {
+        const { category } = req.params;
+
+        if (!category) {
+            return res.status(400).json({ success: false, message: "Category is required" });
+        }
+
+        const products = await Product.find({ category });
+
+        return res.status(200).json({
+            success: true,
+            data: products
+        });
+
+    } catch (error) {
+        console.error("productsByCategory error:", error.message);
+        res.status(500).json({ success: false, message: "Something went wrong" });
+    }
+};
 
 
 export const productById = async (req, res) => {
