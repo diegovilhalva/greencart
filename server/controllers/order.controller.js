@@ -1,5 +1,6 @@
 import Order from "../models/order.model.js"
 import Product from "../models/product.model.js"
+import stripe from "stripe"
 
 export const createOrderCOD = async (req, res) => {
     try {
@@ -27,6 +28,70 @@ export const createOrderCOD = async (req, res) => {
 
         return res.status(201).json({ success: true, message: "Order created sucessfully" })
 
+    } catch (error) {
+        console.error("Order error:", error.message)
+        res.status(500).json({ success: false, message: "Something went wrong" })
+    }
+}
+
+export const createStripeOrder = async (req, res) => {
+    try {
+        const userId = req.user.id
+        const { items, address } = req.body
+        const { origin } = req.headers
+
+        if (!address || items.length === 0) {
+            return res.status(400).json({ success: false, message: "inavalid data" })
+        }
+
+        let productData = []
+
+        let amount = await items.reduce(async (acc, item) => {
+            const product = await Product.findById(item.product)
+            productData.push({
+                name: product.name,
+                price: product.offerPrice,
+                quantity: item.quantity
+            })
+            return (await acc) + product.offerPrice * item.quantity
+        }, 0)
+
+        amount += Math.floor(amount * 0.02)
+        const order = await Order.create({
+            userId,
+            items,
+            amount,
+            address,
+            paymentType: "Online"
+        })
+
+        const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY)
+
+        const line_items = productData.map((item) => {
+            return {
+                price_data: {
+                    currency: "usd",
+                    product_data: {
+                        name: item.name,
+                    },
+                    unit_amount: Math.floor(item.price + item.price * 0.02) * 100
+                },
+                quantity: item.quantity
+            }
+        })
+
+        const session = await stripeInstance.checkout.sessions.create({
+            line_items,
+            mode: "payment",
+            success_url: `${origin}/loader?next=orders`,
+            cancel_url: `${origin}/cart`,
+            metadata: {
+                orderId: order._id.toString(),
+                userId,
+            }
+        })
+
+        return res.status(201).json({ success: true, url: session.url })
     } catch (error) {
         console.error("Order error:", error.message)
         res.status(500).json({ success: false, message: "Something went wrong" })
