@@ -17,7 +17,7 @@ export const AppContextProvider = ({ children }) => {
         page: 1,
         limit: 10,
         total: 0,
-        pages: 0
+        
     })
     const [isLoadingUser, setIsLoadingUser] = useState(true)
 

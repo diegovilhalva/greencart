@@ -12,11 +12,13 @@ import productRoutes from "./routes/product.route.js"
 import cartRoutes from "./routes/cart.route.js"
 import orderRoutes from "./routes/order.route.js"
 import addressRoutes from "./routes/address.route.js"
+import { stripeWebhooks } from "./controllers/order.controller.js";
 dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 4000
 const allowedOrigins = ['http://localhost:5173']
 
+app.post("/stripewebhook", express.raw({ type: 'application/json' }), stripeWebhooks)
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -44,7 +46,7 @@ app.use("/api/seller", sellerRoutes)
 app.use("/api/product", productRoutes)
 app.use("/api/cart", cartRoutes)
 app.use("/api/order", orderRoutes)
-app.use("/api/address",addressRoutes)
+app.use("/api/address", addressRoutes)
 connectDB().then(() => {
     app.listen(PORT, () => {
         console.log(`🚀 Server is running on ${PORT}`);

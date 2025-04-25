@@ -1,5 +1,6 @@
 import Order from "../models/order.model.js"
 import Product from "../models/product.model.js"
+import User from "../models/user.model.js"
 import stripe from "stripe"
 
 export const createOrderCOD = async (req, res) => {
@@ -94,9 +95,67 @@ export const createStripeOrder = async (req, res) => {
         return res.status(201).json({ success: true, url: session.url })
     } catch (error) {
         console.error("Order error:", error.message)
-        res.status(500).json({ success: false, message: "Something went wrong" })
+        return  res.status(500).json({ success: false, message: "Something went wrong" })
     }
 }
+
+export const stripeWebhooks = async (req, res) => {
+    const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY)
+
+    const signature = req.headers["stripe-signature"]
+    let event
+
+    try {
+        event = stripeInstance.webhooks.constructEvent(
+            req.body,
+            signature,
+            process.env.STRIPE_WEBHOOK_SECRET
+        )
+    } catch (error) {
+        res.status(500).send(`Webhooh error: ${error.message}`)
+    }
+
+    switch (event.type) {
+        case "payment_intent.succeeded": {
+            const payment_intent = event.data.object
+            const payment_intent_id = payment_intent.id
+
+            const session = await stripeInstance.checkout.sessions.list({
+                payment_intent: payment_intent_id,
+            })
+
+            const { orderId, userId } = session.data[0].metadata
+
+            await Order.findByIdAndUpdate(orderId, { isPaid: true })
+
+            await User.findByIdAndUpdate(userId, { cartItems: {} })
+            break;
+        }
+        case "payment_intent.payment_failed": {
+            const payment_intent = event.data.object
+            const payment_intent_id = payment_intent.id
+
+            const session = await stripeInstance.checkout.sessions.list({
+                payment_intent: payment_intent_id,
+            })
+
+            const { orderId } = session.data[0].metadata
+
+            await Order.findByIdAndDelete(orderId)
+
+            break;
+        }
+
+
+
+        default:
+            console.error(`Unhandled event type ${event.type}`)
+            break;
+    }
+
+    res.status(200).json({ received: true })
+}
+
 
 export const getUserOrders = async (req, res) => {
     try {
