@@ -77,7 +77,7 @@ SELLER_PASSWORD=create_a_seller_password
 Create a `.env` file inside the `client` folder with the following variables:
 ```
 VITE_CURRENCY="$"
-VITE_URL_ENDPOINT=yor_local_api_endpoint
+VITE_URL_ENDPOINT=your_local_api_endpoint
 
 ```
 
