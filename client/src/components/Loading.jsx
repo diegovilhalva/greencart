@@ -3,12 +3,15 @@ import { useAppContext } from "../context/AppContext";
 import { useEffect } from "react";
 
 const Loading = () => {
-    const { navigate, setCartItems } = useAppContext();
+    const { navigate, setCartItems,user, fetchUser } = useAppContext();
     const { search } = useLocation();
     const query = new URLSearchParams(search);
     const nextUrl = query.get('next');
     const paymentStatus = query.get('payment');
 
+    useEffect(() => {
+        fetchUser(); 
+    }, []);
     
     useEffect(() => {
         if (paymentStatus === "success") {
@@ -18,12 +21,12 @@ const Loading = () => {
 
     
     useEffect(() => {
-        if (nextUrl) {
+        if (user && nextUrl) {
             setTimeout(() => {
                 navigate(`/${nextUrl}`);
             }, 5000);
         }
-    }, [nextUrl, navigate]);
+    }, [user, nextUrl])
 
     return (
         <div className="flex justify-center items-center h-screen">
