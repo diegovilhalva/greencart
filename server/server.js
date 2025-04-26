@@ -29,9 +29,11 @@ app.use(session({
     secret: process.env.JWT_SECRET,
     resave: false,
     saveUninitialized: true,
+    proxy:true,
     secure: process.env.NODE_ENV !== "development",
     sameSite: process.env.NODE_ENV !== "development" ? "none" : "lax"
 }));
+pp.set("trust proxy", 1); 
 
 app.use(passport.initialize());
 app.use(passport.session());
