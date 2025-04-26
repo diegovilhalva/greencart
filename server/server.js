@@ -29,18 +29,13 @@ app.use(session({
     secret: process.env.JWT_SECRET,
     resave: false,
     saveUninitialized: true,
-    proxy: true, 
-    cookie: {
-        secure: process.env.NODE_ENV === "production", 
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", 
-        maxAge: 7 * 24 * 60 * 60 * 1000
-    }
+    secure: process.env.NODE_ENV !== "development",
+    sameSite: process.env.NODE_ENV !== "development" ? "none" : "lax"
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.set("trust proxy", 1); 
 
 app.get("/", (req, res) => {
     res.send("ok")
