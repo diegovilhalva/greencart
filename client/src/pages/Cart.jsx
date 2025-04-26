@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAppContext } from '../context/AppContext'
-import { assets, dummyAddress } from '../assets/assets'
+import { assets } from '../assets/assets'
 import { useEffect } from 'react'
 import axiosInstance from '../api/axios'
 import toast from 'react-hot-toast'
@@ -83,6 +83,7 @@ const Cart = () => {
             toast.error(error.response.data.message)
         }
     }
+    console.log(cartArray)
     return products.length > 0 && getCartCount() > 0 ? (
         <div className="flex flex-col md:flex-row mt-16">
             <div className='flex-1 max-w-4xl'>

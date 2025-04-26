@@ -26,6 +26,7 @@ export const createOrderCOD = async (req, res) => {
             address,
             paymentType: "COD"
         })
+        await User.findByIdAndUpdate(userId, { cartItems: {} })
 
         return res.status(201).json({ success: true, message: "Order created sucessfully" })
 
@@ -42,7 +43,7 @@ export const createStripeOrder = async (req, res) => {
         const { origin } = req.headers
 
         if (!address || items.length === 0) {
-            return res.status(400).json({ success: false, message: "inavalid data" })
+            return res.status(400).json({ success: false, message: "invalid data" })
         }
 
         let productData = []
@@ -84,14 +85,14 @@ export const createStripeOrder = async (req, res) => {
         const session = await stripeInstance.checkout.sessions.create({
             line_items,
             mode: "payment",
-            success_url: `${origin}/loader?next=orders`,
+            success_url: `${origin}/loader?next=orders&payment=success`,
             cancel_url: `${origin}/cart`,
             metadata: {
                 orderId: order._id.toString(),
                 userId,
             }
         })
-
+        
         return res.status(201).json({ success: true, url: session.url })
     } catch (error) {
         console.error("Order error:", error.message)
@@ -125,7 +126,7 @@ export const stripeWebhooks = async (req, res) => {
             })
 
             const { orderId, userId } = session.data[0].metadata
-
+            console.log("Atualizando carrinho do usuário:", userId);
             await Order.findByIdAndUpdate(orderId, { isPaid: true })
 
             await User.findByIdAndUpdate(userId, { cartItems: {} })
