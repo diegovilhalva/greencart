@@ -25,12 +25,22 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(cors({ origin: allowedOrigins, credentials: true, allowedHeaders: ['Content-Type', 'Authorization'] }))
 
+
+app.set('trust proxy', 1); 
+
 app.use(session({
-    secret: process.env.JWT_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    secure: process.env.NODE_ENV !== "development",
-    sameSite: process.env.NODE_ENV !== "development" ? "none" : "lax"
+  secret: process.env.JWT_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: true, 
+    sameSite: 'none',
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    domain: process.env.NODE_ENV === 'production' 
+      ? '.vercel.app' 
+      : undefined
+  }
 }));
 
 app.use(passport.initialize());
