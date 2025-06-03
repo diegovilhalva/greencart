@@ -23,7 +23,7 @@ app.post("/stripewebhook", express.raw({ type: 'application/json' }), stripeWebh
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({ origin: allowedOrigins, credentials: true, allowedHeaders: ['Content-Type', 'Authorization'] }))
+app.use(cors({ origin: allowedOrigins, credentials: true, methods: ['GET', 'POST', 'PUT','PATCH','DELETE'],   allowedHeaders: ['Content-Type', 'Authorization'] }))
 
 
 app.set('trust proxy', 1); 
